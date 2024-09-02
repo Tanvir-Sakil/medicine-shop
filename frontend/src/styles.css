@@ -1,0 +1,51 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+nav {
+  background-color: #007bff;
+  padding: 1rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* This will push nav-left to the left and nav-right to the right */
+}
+
+.nav-left {
+  display: flex;
+}
+
+.nav-left a {
+  color: white;
+  text-decoration: none;
+  margin-right: 20px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.nav-right a, .nav-right button {
+  color: white;
+  text-decoration: none;
+  background: none;
+  border: none;
+  margin-left: 30px;
+  cursor: pointer;
+}
+
+.nav-right a:hover, .nav-right button:hover {
+  text-decoration: underline;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
