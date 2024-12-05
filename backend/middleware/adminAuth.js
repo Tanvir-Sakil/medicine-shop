@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 function adminAuth(req, res, next) {
+  //console.log('Authorization Header:', req.headers.authorization);
   const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
@@ -19,5 +20,7 @@ function adminAuth(req, res, next) {
     res.status(400).send('Invalid Token');
   }
 }
+
+
 
 module.exports = adminAuth;

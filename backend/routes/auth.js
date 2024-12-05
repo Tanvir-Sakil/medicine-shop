@@ -4,8 +4,6 @@ const User = require('../models/User');
 
 const router = express.Router();
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
-
-// Login route
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
@@ -17,9 +15,6 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user._id, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
     res.json({ token });
   });
-  
-
-// Sign-up route (Optional, for testing purposes)
 router.post('/signup', async (req, res) => {
     try {
       const { username, password, role } = req.body;
