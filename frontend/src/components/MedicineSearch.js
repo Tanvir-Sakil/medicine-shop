@@ -1,7 +1,7 @@
 import React from 'react';
 import './MedicineSearch.css';
 
-function MedicineSearch({ query, setQuery, medicineResults, handleSearch, isLoggedIn, isAdmin }) {
+function MedicineSearch({ query, setQuery, medicineResults, handleSearch, isLoggedIn, isAdmin, handleBuyClick }) {
   // Handle search query change
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
@@ -24,9 +24,10 @@ function MedicineSearch({ query, setQuery, medicineResults, handleSearch, isLogg
               <h3>{medicine.name}</h3>
               <img src={medicine.imageUrl} alt={medicine.name} />
               <p>{medicine.description}</p>
-              {/* Show "Buy" button only for logged-in non-admin users */}
+              <p>Price: ${medicine.price}</p>
+              {/* Show Buy button only if the user is logged in and not an admin */}
               {isLoggedIn && !isAdmin && (
-                <button>Buy</button>  // Only non-admin users will see this button
+                <button onClick={() => handleBuyClick(medicine)}>Buy</button>
               )}
             </div>
           </div>

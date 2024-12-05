@@ -1,0 +1,44 @@
+/* ProductDetails.css */
+
+/* Styling the card container */
+.product-details {
+    width: 80%;
+    max-width: 600px;
+    margin: 50px auto; /* Centers the card on the page */
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+    border-radius: 8px; /* Rounds the corners */
+    text-align: center; /* Centers the text inside the card */
+  }
+  
+  /* Style for the image inside the card */
+  .product-details img {
+    width: 100%;
+    max-width: 300px; /* Restricts image size */
+    height: auto;
+    margin-bottom: 20px; /* Adds space below the image */
+  }
+  
+  /* Styling the buttons */
+  .product-details button {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .product-details button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  /* Styling the price */
+  .product-details p strong {
+    font-size: 1.2em;
+    color: #333;
+  }
+  

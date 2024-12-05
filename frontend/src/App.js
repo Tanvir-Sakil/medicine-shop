@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';  
+import { Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom'; // Removed BrowserRouter
+import { jwtDecode } from 'jwt-decode';
 import MedicineSearch from './components/MedicineSearch';
 import AdminPanel from './components/AdminPanel';
 import Signup from './components/Signup';
 import Login from './components/Login';
-
+import ProductDetails from './components/ProductDetails';
+import ProceedWithPurchase from './components/ProceedWithPurchase'; 
+//import './App.css';
 function App() {
   const token = localStorage.getItem('token');
   let isAdmin = false;
@@ -21,13 +23,15 @@ function App() {
   const [query, setQuery] = useState('');
   const [medicineResults, setMedicineResults] = useState([]);
   const [allMedicines, setAllMedicines] = useState([]);
+  const [selectedMedicine, setSelectedMedicine] = useState(null);
 
-  // Fetch all medicines on initial load
+  const navigate = useNavigate();
+
   const fetchAllMedicines = async () => {
     try {
       const response = await axios.get('http://localhost:5002/products');
       setAllMedicines(response.data);
-      setMedicineResults(response.data); // Show all products by default
+      setMedicineResults(response.data);
     } catch (error) {
       console.error('There was an error fetching the data!', error);
     }
@@ -35,14 +39,12 @@ function App() {
 
   useEffect(() => {
     fetchAllMedicines();
-  }, []); // Fetch on initial load
+  }, []);
 
-  // Handle search query change
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
   };
 
-  // Handle search action
   const handleSearch = async () => {
     if (query.trim() !== '') {
       try {
@@ -73,46 +75,58 @@ const resetSearch = async () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.reload(); // Reload the page to reset state
+    window.location.reload();
+  };
+
+  const handleBuyClick = (medicine) => {
+    setSelectedMedicine(medicine);
+    navigate('/product-details');
   };
 
   return (
-    <Router>
-      <div>
-        <nav>
-          <div className="nav-left">
-            <Link to="/" onClick={resetSearch}>Medicine Shop</Link> {/* Reset search when clicked */}
-          </div>
-          <div className="nav-right">
-            {isAdmin && <Link to="/admin">Admin Panel</Link>}
-            {isLoggedIn ? (
-              <button onClick={handleLogout}>Logout</button>
-            ) : (
-              <Link to="/login">Login</Link>
-            )}
-          </div>
-        </nav>
-        <Routes>
+    <div>
+      <nav>
+        <div className="nav-left">
+          <Link to="/" onClick={resetSearch}>Medicine Shop</Link>
+        </div>
+        <div className="nav-right">
+          {isAdmin && <Link to="/admin">Admin Panel</Link>}
+          {isLoggedIn ? (
+            <button onClick={handleLogout}>Logout</button>
+          ) : (
+            <Link to="/login">Login</Link>
+          )}
+        </div>
+      </nav>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <MedicineSearch
+              query={query}
+              setQuery={setQuery}
+              medicineResults={medicineResults}
+              handleSearch={handleSearch}
+              isLoggedIn={isLoggedIn}
+              isAdmin={isAdmin}
+              handleBuyClick={handleBuyClick}
+            />
+          }
+        />
+        {isAdmin && <Route path="/admin" element={<AdminPanel fetchAllMedicines={fetchAllMedicines} />} />}
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/product-details"
+          element={<ProductDetails medicine={selectedMedicine} />}
+        />
           <Route
-            path="/"
-            element={
-              <MedicineSearch
-                query={query}
-                setQuery={setQuery}
-                medicineResults={medicineResults}
-                handleSearch={handleSearch}
-                isLoggedIn={isLoggedIn}  // Pass logged-in state
-                isAdmin={isAdmin}        // Pass admin state
-              />
-            }
-          />
-          {isAdmin && <Route path="/admin" element={<AdminPanel fetchAllMedicines={fetchAllMedicines} />} />}
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </div>
-    </Router>
+    path="/proceed-with-purchase"
+    element={<ProceedWithPurchase selectedMedicine={selectedMedicine} />}
+  />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </div>
   );
 }
 

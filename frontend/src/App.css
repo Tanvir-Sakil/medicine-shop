@@ -27,6 +27,40 @@
 .App-link {
   color: #61dafb;
 }
+/* Ensure your navbar styles are correct */
+nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #333;
+}
+
+.nav-left {
+  color: white;
+}
+
+.nav-right {
+  color: white;
+}
+
+nav a {
+  text-decoration: none;
+  color: white;
+  margin-left: 10px;
+}
+
+nav button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+nav button:hover {
+  background-color: #45a049;
+}
+
 
 @keyframes App-logo-spin {
   from {
