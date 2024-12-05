@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './Login.css'; // Import the CSS file
+import './Login.css';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -8,15 +8,15 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault(); 
 
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const response = await axios.post('https://medicine-shop-backend.vercel.app/api/login', {
         username,
         password
       });
-      localStorage.setItem('token', response.data.token); // Save token to local storage
-      window.location.href = '/'; // Redirect to homepage or wherever appropriate
+      localStorage.setItem('token', response.data.token); 
+      window.location.href = '/'; 
     } catch (error) {
       setError(error.response ? error.response.data.message : error.message);
     }

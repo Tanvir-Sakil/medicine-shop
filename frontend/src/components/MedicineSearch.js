@@ -1,26 +1,10 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import './MedicineSearch.css';
 
-function MedicineSearch() {
-  const [query, setQuery] = useState('');
-  const [medicineResults, setMedicineResults] = useState([]);
-
+function MedicineSearch({ query, setQuery, medicineResults, handleSearch, isLoggedIn, isAdmin }) {
+  // Handle search query change
   const handleSearchChange = (event) => {
     setQuery(event.target.value);
-  };
-
-  const handleSearch = async () => {
-    if (query.trim() !== '') {
-      try {
-        const response = await axios.get('http://localhost:5000/products/search', {
-          params: { term: query },
-        });
-        setMedicineResults(response.data);
-      } catch (error) {
-        console.error("There was an error fetching the data!", error);
-      }
-    }
   };
 
   return (
@@ -32,13 +16,18 @@ function MedicineSearch() {
         onChange={handleSearchChange}
       />
       <button onClick={handleSearch}>Search</button>
+
       <div className="product-grid">
         {medicineResults.map((medicine, index) => (
           <div className="card" key={index}>
             <div className="card-content">
-            <h3>{medicine.name}</h3>
-            <p>{medicine.description}</p>
-            <img src={medicine.imageUrl} alt={medicine.name} />
+              <h3>{medicine.name}</h3>
+              <img src={medicine.imageUrl} alt={medicine.name} />
+              <p>{medicine.description}</p>
+              {/* Show "Buy" button only for logged-in non-admin users */}
+              {isLoggedIn && !isAdmin && (
+                <button>Buy</button>  // Only non-admin users will see this button
+              )}
             </div>
           </div>
         ))}

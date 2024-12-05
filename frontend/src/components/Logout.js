@@ -1,4 +1,3 @@
-// src/components/Logout.js
 import React from 'react';
 
 function Logout() {

@@ -11,7 +11,7 @@ function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/signup', { // Updated URL
+      const response = await axios.post('https://medicine-shop-backend.vercel.app/api/signup', { // Updated URL
         username,
         password,
         role
