@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Importing axios
 import './ProceedWithPurchase.css'; // Importing CSS for styling
 
 function ProceedWithPurchase({ selectedMedicine }) {
@@ -11,6 +12,7 @@ function ProceedWithPurchase({ selectedMedicine }) {
     address: '',
     city: '',
     postalCode: '',
+    quantity: 1, // Default quantity to 1
   });
 
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -24,13 +26,34 @@ function ProceedWithPurchase({ selectedMedicine }) {
     }));
   };
 
-  // Handle form submission
-  const handleSubmit = (event) => {
+  // Calculate total price
+  const totalAmount = selectedMedicine.price * formData.quantity;
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Simulate payment processing
-    setTimeout(() => {
-      setPaymentSuccess(true);
-    }, 2000); // Simulate a delay for payment
+    
+    try {
+      const purchaseData = {
+        customerName: formData.name,
+        email: formData.email,
+        address: formData.address,
+        medicineDetails: [
+          {
+            name: selectedMedicine.name,
+            price: selectedMedicine.price,
+            quantity: formData.quantity, // Include the quantity selected
+          }
+        ],
+        totalAmount: totalAmount, // Send the total amount
+      };
+  
+      await axios.post('http://localhost:5003/api/purchase', purchaseData);
+  
+      setPaymentSuccess(true); // Show success message
+    } catch (error) {
+      console.error('Error saving purchase details:', error);
+      alert('Failed to complete the purchase. Please try again.');
+    }
   };
 
   if (paymentSuccess) {
@@ -107,6 +130,24 @@ function ProceedWithPurchase({ selectedMedicine }) {
             onChange={handleInputChange}
             required
           />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="quantity">Quantity</label>
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            min="1"
+            value={formData.quantity}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        {/* Display Total Price */}
+        <div className="total-price">
+          <p><strong>Total Amount:</strong> ${totalAmount}</p>
         </div>
 
         <button type="submit">Confirm and Pay</button>
