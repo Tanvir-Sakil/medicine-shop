@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode'; // Fixed incorrect destructuring
 import axios from 'axios';
-
+import './App.css';
 import MedicineSearch from './components/MedicineSearch';
 import AdminPanel from './components/AdminPanel';
 import Signup from './components/Signup';

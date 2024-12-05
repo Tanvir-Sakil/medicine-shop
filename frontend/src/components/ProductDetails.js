@@ -19,7 +19,7 @@ function ProductDetails({ medicine }) {
       <h2>{medicine.name}</h2>
       <img src={medicine.imageUrl} alt={medicine.name} />
       <p>{medicine.description}</p>
-      <p><strong>Price: ${medicine.price}</strong></p>
+      <p><strong>Price: ৳{medicine.price}</strong></p>
       <button onClick={() => navigate('/')}>Back to Search</button>
       <button onClick={() => navigate('/proceed-with-purchase')}>
   Proceed with Purchase</button>

@@ -31,23 +31,23 @@ function AdminPurchases() {
               <th>Customer Name</th>
               <th>Email</th>
               <th>Address</th>
-              <th>Postal Code</th>
+              <th>Postal Code</th> {/* Postal Code Column */}
+              <th>Mobile Number</th> {/* Mobile Number Column */}
               <th>Medicine</th>
               <th>Price</th>
-              <th>Total Price</th> {/* Added column for total price */}
+              <th>Total Price</th>
               <th>Date</th>
             </tr>
           </thead>
           <tbody>
             {purchases.map((purchase) => (
-              <tr key={purchase._id}> {/* Use _id for unique key */}
-                <td>{purchase._id}</td> {/* Use _id as the identifier */}
-
-                {/* Customer Details */}
+              <tr key={purchase._id}>
+                <td>{purchase._id}</td>
                 <td>{purchase.customerName}</td>
                 <td>{purchase.email}</td>
                 <td>{purchase.address}</td>
-                <td>{purchase.postalCode}</td>
+                <td>{purchase.postalCode}</td> {/* Display Postal Code */}
+                <td>{purchase.mobileNumber}</td> {/* Display Mobile Number */}
 
                 {/* Medicine Details */}
                 <td>
@@ -61,16 +61,13 @@ function AdminPurchases() {
                 <td>
                   {purchase.medicineDetails?.map((medicine, index) => (
                     <div key={index}>
-                      <p>${medicine?.price}</p>
+                      <p>৳{medicine?.price}</p>
                     </div>
                   ))}
                 </td>
 
-                {/* Total Price */}
                 <td>${purchase.totalAmount}</td> {/* Display totalAmount */}
-
-                {/* Date */}
-                <td>{new Date(purchase.date).toLocaleString()}</td> {/* Format the date */}
+                <td>{new Date(purchase.date).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

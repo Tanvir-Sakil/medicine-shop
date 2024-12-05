@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Importing axios
-import './ProceedWithPurchase.css'; // Importing CSS for styling
+import axios from 'axios';
+import './ProceedWithPurchase.css';
 
 function ProceedWithPurchase({ selectedMedicine }) {
   const navigate = useNavigate();
 
+  // Declare state variables
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     address: '',
-    city: '',
     postalCode: '',
-    quantity: 1, // Default quantity to 1
+    mobileNumber: '',
+    quantity: 1,
   });
 
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -26,9 +27,16 @@ function ProceedWithPurchase({ selectedMedicine }) {
     }));
   };
 
-  // Calculate total price
+  // Check if selectedMedicine is null or undefined
+  if (!selectedMedicine) {
+    navigate('/'); // Redirect to homepage if no medicine selected
+    return null;
+  }
+
+  // Calculate total amount
   const totalAmount = selectedMedicine.price * formData.quantity;
 
+  // Handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
     
@@ -37,23 +45,48 @@ function ProceedWithPurchase({ selectedMedicine }) {
         customerName: formData.name,
         email: formData.email,
         address: formData.address,
+        postalCode: formData.postalCode,
+        mobileNumber: formData.mobileNumber,
         medicineDetails: [
           {
             name: selectedMedicine.name,
             price: selectedMedicine.price,
-            quantity: formData.quantity, // Include the quantity selected
+            quantity: formData.quantity,
           }
         ],
-        totalAmount: totalAmount, // Send the total amount
+        totalAmount: totalAmount,
       };
   
       await axios.post('http://localhost:5003/api/purchase', purchaseData);
   
-      setPaymentSuccess(true); // Show success message
+      setPaymentSuccess(true);
     } catch (error) {
       console.error('Error saving purchase details:', error);
       alert('Failed to complete the purchase. Please try again.');
     }
+  };
+
+  // Handle logout
+  const handleLogout2 = () => {
+    // Clear session data and reset form
+    localStorage.removeItem('userData');
+    sessionStorage.removeItem('authToken');
+    
+    localStorage.removeItem('token');
+    window.location.href = '/';
+    setFormData({
+      name: '',
+      email: '',
+      address: '',
+      postalCode: '',
+      mobileNumber: '',
+      quantity: 1,
+    });
+    setPaymentSuccess(false);
+
+    // Redirect to homepage after logout
+    console.log("Logging out and navigating to home");
+    navigate('/'); // Ensure navigate works
   };
 
   if (paymentSuccess) {
@@ -62,6 +95,7 @@ function ProceedWithPurchase({ selectedMedicine }) {
         <h2>Payment Successful!</h2>
         <p>Thank you for purchasing {selectedMedicine.name}.</p>
         <button onClick={() => navigate('/')}>Go Back to Home</button>
+        <button onClick={handleLogout2} >Logout</button>
       </div>
     );
   }
@@ -70,7 +104,7 @@ function ProceedWithPurchase({ selectedMedicine }) {
     <div className="proceed-with-purchase">
       <h2>Proceed with Purchase</h2>
       <p><strong>Item:</strong> {selectedMedicine.name}</p>
-      <p><strong>Price:</strong> ${selectedMedicine.price}</p>
+      <p><strong>Price:</strong> ৳{selectedMedicine.price}</p>
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -109,18 +143,6 @@ function ProceedWithPurchase({ selectedMedicine }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="city">City</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value={formData.city}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
           <label htmlFor="postalCode">Postal Code</label>
           <input
             type="text"
@@ -133,24 +155,35 @@ function ProceedWithPurchase({ selectedMedicine }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="quantity">Quantity</label>
+          <label htmlFor="mobileNumber">Mobile Number</label>
           <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            min="1"
-            value={formData.quantity}
+            type="text"
+            id="mobileNumber"
+            name="mobileNumber"
+            value={formData.mobileNumber}
             onChange={handleInputChange}
             required
           />
         </div>
 
-        {/* Display Total Price */}
-        <div className="total-price">
-          <p><strong>Total Amount:</strong> ${totalAmount}</p>
+        <div className="form-group">
+          <label htmlFor="quantity">Quantity</label>
+          <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            value={formData.quantity}
+            onChange={handleInputChange}
+            min="1"
+            required
+          />
         </div>
 
-        <button type="submit">Confirm and Pay</button>
+        <div className="total-amount">
+          <p><strong>Total Amount:</strong> ৳{totalAmount}</p>
+        </div>
+
+        <button type="submit">Complete Purchase</button>
       </form>
     </div>
   );

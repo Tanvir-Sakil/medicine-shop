@@ -24,7 +24,7 @@ function MedicineSearch({ query, setQuery, medicineResults, handleSearch, isLogg
               <h3>{medicine.name}</h3>
               <img src={medicine.imageUrl} alt={medicine.name} />
               <p>{medicine.description}</p>
-              <p>Price: ${medicine.price}</p>
+              <p>Price: ৳{medicine.price}</p>
               {/* Show Buy button only if the user is logged in and not an admin */}
               {isLoggedIn && !isAdmin && (
                 <button onClick={() => handleBuyClick(medicine)}>Buy</button>

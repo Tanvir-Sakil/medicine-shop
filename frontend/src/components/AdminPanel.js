@@ -134,7 +134,7 @@ function AdminPanel() {
             <div className="product-card" key={product._id}>
               <h3>{product.name}</h3>
               <p>{product.description}</p>
-              <p><strong>Price: ${product.price}</strong></p>  {/* Display price */}
+              <p><strong>Price: ৳{product.price}</strong></p>  {/* Display price */}
               <img
                 src={product.imageUrl}
                 alt={product.name || 'Product'}
