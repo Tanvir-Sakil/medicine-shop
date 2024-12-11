@@ -14,7 +14,7 @@ function AdminPanel() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:5003/products/search', {
+        const response = await axios.get('https://medicine-shop-backend.vercel.app/api/products/search', {
           params: { term: '' }, // Fetch all products
         });
         setProducts(response.data);
@@ -49,7 +49,7 @@ function AdminPanel() {
       formData.append('image', imageFile);
 
       const response = await axios.post(
-        'http://localhost:5003/products',
+        'https://medicine-shop-backend.vercel.app/api/products',
         formData,
         {
           headers: {
@@ -83,7 +83,7 @@ function AdminPanel() {
       setIsLoading(true); // Show loading indicator
       const token = localStorage.getItem('token');
 
-      const response = await axios.delete(`http://localhost:5003/products/${id}`, {
+      const response = await axios.delete(`https://medicine-shop-backend.vercel.app/api/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

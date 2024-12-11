@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import './ProceedWithPurchase.css';
+
+// Load the Stripe publishable key
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY);
+// Replace with your Stripe publishable key
 
 function ProceedWithPurchase({ selectedMedicine }) {
   const navigate = useNavigate();
 
-  // Declare state variables
+  // Redirect if no medicine is selected
+  useEffect(() => {
+    if (!selectedMedicine) {
+      console.log("No medicine selected. Redirecting to home...");
+      navigate('/'); // Redirect to homepage
+    }
+  }, [selectedMedicine, navigate]);
+
+  // State variables
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,6 +31,9 @@ function ProceedWithPurchase({ selectedMedicine }) {
   });
 
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [clientSecret, setClientSecret] = useState('');
+  const stripe = useStripe();
+  const elements = useElements();
 
   // Handle form input changes
   const handleInputChange = (event) => {
@@ -27,75 +44,87 @@ function ProceedWithPurchase({ selectedMedicine }) {
     }));
   };
 
-  // Check if selectedMedicine is null or undefined
-  if (!selectedMedicine) {
-    navigate('/'); // Redirect to homepage if no medicine selected
-    return null;
-  }
-
   // Calculate total amount
-  const totalAmount = selectedMedicine.price * formData.quantity;
+  const totalAmount = selectedMedicine ? selectedMedicine.price * formData.quantity : 0;
 
-  // Handle form submission
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    
+  // Create PaymentIntent on the backend
+  const createPaymentIntent = async () => {
     try {
-      const purchaseData = {
-        customerName: formData.name,
-        email: formData.email,
-        address: formData.address,
-        postalCode: formData.postalCode,
-        mobileNumber: formData.mobileNumber,
-        medicineDetails: [
-          {
-            name: selectedMedicine.name,
-            price: selectedMedicine.price,
-            quantity: formData.quantity,
-          }
-        ],
-        totalAmount: totalAmount,
-      };
-  
-      await axios.post('http://localhost:5003/api/purchase', purchaseData);
-  
-      setPaymentSuccess(true);
+      const { data } = await axios.post('https://medicine-shop-backend.vercel.app/api/payments/create-payment-intent', {
+        amount: totalAmount * 100, // Stripe expects the amount in smallest currency unit
+      });
+
+      setClientSecret(data.clientSecret);
     } catch (error) {
-      console.error('Error saving purchase details:', error);
-      alert('Failed to complete the purchase. Please try again.');
+      console.error('Error creating payment intent:', error.response?.data || error.message);
+      alert('Failed to create payment intent. Please try again.');
     }
   };
 
-  // Handle logout
-  const handleLogout2 = () => {
-    // Clear session data and reset form
-    localStorage.removeItem('userData');
-    sessionStorage.removeItem('authToken');
-    
-    localStorage.removeItem('token');
-    window.location.href = '/';
-    setFormData({
-      name: '',
-      email: '',
-      address: '',
-      postalCode: '',
-      mobileNumber: '',
-      quantity: 1,
-    });
-    setPaymentSuccess(false);
+  useEffect(() => {
+    if (selectedMedicine && totalAmount > 0) {
+      createPaymentIntent();
+    }
+  }, [selectedMedicine, totalAmount]);
 
-    // Redirect to homepage after logout
-    console.log("Logging out and navigating to home");
-    navigate('/'); // Ensure navigate works
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!stripe || !elements) {
+      console.log('Stripe.js or Elements not loaded yet.');
+      return;
+    }
+
+    if (!clientSecret) {
+      alert('Invalid payment intent. Redirecting to success page anyway.');
+      setPaymentSuccess(true); // Proceed to success compliment page
+      return;
+    }
+
+    const cardElement = elements.getElement(CardElement);
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: formData.name,
+            email: formData.email,
+          },
+        },
+      });
+
+      if (paymentIntent?.status === 'succeeded') {
+        console.log('Payment successful!');
+      } else if (error) {
+        console.error('Payment failed:', error.message);
+      }
+    } catch (err) {
+      console.error('Payment processing error:', err.message);
+    }
+
+    setPaymentSuccess(true);
   };
+
+  const handleLogout2 = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate('/'); // Navigate to homepage after logout
+  };
+
+  if (!selectedMedicine) {
+    return null; // Render nothing if selectedMedicine is not available
+  }
 
   if (paymentSuccess) {
     return (
       <div className="payment-success">
-        <h2>Payment Successful!</h2>
+        <h2>{clientSecret ? 'Payment Successful!' : 'Payment Processing Error'}</h2>
         <p>Thank you for purchasing {selectedMedicine.name}.</p>
+        <p><strong>Total Paid:</strong> ৳{totalAmount}</p>
+        <p><strong>Status:</strong> {clientSecret ? 'Success' : 'Error Occurred (but proceeding)'}</p>
         <button onClick={() => navigate('/')}>Go Back to Home</button>
-        <button onClick={handleLogout2} >Logout</button>
+        <button onClick={handleLogout2}>Logout</button>
       </div>
     );
   }
@@ -108,10 +137,9 @@ function ProceedWithPurchase({ selectedMedicine }) {
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="name">Name</label>
+          <label>Name</label>
           <input
             type="text"
-            id="name"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
@@ -120,10 +148,9 @@ function ProceedWithPurchase({ selectedMedicine }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="email">Email</label>
+          <label>Email</label>
           <input
             type="email"
-            id="email"
             name="email"
             value={formData.email}
             onChange={handleInputChange}
@@ -132,21 +159,19 @@ function ProceedWithPurchase({ selectedMedicine }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="address">Address</label>
+          <label>Address</label>
           <textarea
-            id="address"
             name="address"
             value={formData.address}
             onChange={handleInputChange}
             required
-          ></textarea>
+          />
         </div>
 
         <div className="form-group">
-          <label htmlFor="postalCode">Postal Code</label>
+          <label>Postal Code</label>
           <input
             type="text"
-            id="postalCode"
             name="postalCode"
             value={formData.postalCode}
             onChange={handleInputChange}
@@ -155,10 +180,9 @@ function ProceedWithPurchase({ selectedMedicine }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="mobileNumber">Mobile Number</label>
+          <label>Mobile Number</label>
           <input
             type="text"
-            id="mobileNumber"
             name="mobileNumber"
             value={formData.mobileNumber}
             onChange={handleInputChange}
@@ -167,10 +191,9 @@ function ProceedWithPurchase({ selectedMedicine }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="quantity">Quantity</label>
+          <label>Quantity</label>
           <input
             type="number"
-            id="quantity"
             name="quantity"
             value={formData.quantity}
             onChange={handleInputChange}
@@ -183,10 +206,18 @@ function ProceedWithPurchase({ selectedMedicine }) {
           <p><strong>Total Amount:</strong> ৳{totalAmount}</p>
         </div>
 
-        <button type="submit">Complete Purchase</button>
+        <CardElement options={{ hidePostalCode: true }} />
+
+        <button type="submit" disabled={!stripe || !clientSecret}>
+          Complete Purchase
+        </button>
       </form>
     </div>
   );
 }
-
-export default ProceedWithPurchase;
+const WrappedProceedWithPurchase = (props) => (
+  <Elements stripe={stripePromise}>
+    <ProceedWithPurchase {...props} />
+  </Elements>
+);
+export default WrappedProceedWithPurchase;

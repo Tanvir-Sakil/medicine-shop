@@ -8,7 +8,7 @@ function AdminPurchases() {
   useEffect(() => {
     const fetchPurchases = async () => {
       try {
-        const response = await axios.get('http://localhost:5003/api/purchases');
+        const response = await axios.get('https://medicine-shop-backend.vercel.app/api/purchases');
         setPurchases(response.data);
       } catch (error) {
         console.error('Error fetching purchase data:', error);
