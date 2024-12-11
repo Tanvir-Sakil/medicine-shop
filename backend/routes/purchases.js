@@ -42,6 +42,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const purchase = await Purchase.findByIdAndDelete(id);
+    if (!purchase) {
+      return res.status(404).send('Purchase not found');
+    }
+    res.status(200).send('Purchase deleted');
+  } catch (error) {
+    res.status(500).send('Server error');
+  }
+});
+
+
 // Test route to verify purchase route is working
 router.get('/test', (req, res) => {
   res.json({ message: 'Purchase route is working!' });
