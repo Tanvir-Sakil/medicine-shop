@@ -6,7 +6,7 @@ dotenv.config();
 const paymentRoutes = require('./routes/payments');
 
 const app = express();
-const PORT = process.env.PORT || 5005;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors());
@@ -22,17 +22,14 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const purchaseRoutes = require('./routes/purchases'); // Add the purchase route
-
-
-
-
 app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
 app.use('/api/purchases', purchaseRoutes);
+app.use('/api/products', productRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/purchase', purchaseRoutes);
 
 
 
 // Server
-//app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 module.exports = app;
