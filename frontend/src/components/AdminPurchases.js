@@ -18,6 +18,24 @@ function AdminPurchases() {
     fetchPurchases();
   }, []);
 
+  // Handle deletion of a purchase
+  const handleDelete = async (purchaseId) => {
+    try {
+      // Send DELETE request to remove the purchase from the backend
+      await axios.delete(`https://medicine-shop-backend.vercel.app/api/purchases/${purchaseId}`);
+      
+      // Remove the deleted purchase from the state
+      setPurchases((prevPurchases) =>
+        prevPurchases.filter((purchase) => purchase._id !== purchaseId)
+      );
+      
+      alert('Purchase deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting purchase:', error);
+      alert('Failed to delete purchase.');
+    }
+  };
+
   return (
     <div className="admin-purchases">
       <h2>Customer Purchase Details</h2>
@@ -31,12 +49,13 @@ function AdminPurchases() {
               <th>Customer Name</th>
               <th>Email</th>
               <th>Address</th>
-              <th>Postal Code</th> {/* Postal Code Column */}
-              <th>Mobile Number</th> {/* Mobile Number Column */}
+              <th>Postal Code</th>
+              <th>Mobile Number</th>
               <th>Medicine</th>
               <th>Price</th>
               <th>Total Price</th>
               <th>Date</th>
+              <th>Actions</th> {/* Add Actions Column for the Delete Button */}
             </tr>
           </thead>
           <tbody>
@@ -46,8 +65,8 @@ function AdminPurchases() {
                 <td>{purchase.customerName}</td>
                 <td>{purchase.email}</td>
                 <td>{purchase.address}</td>
-                <td>{purchase.postalCode}</td> {/* Display Postal Code */}
-                <td>{purchase.mobileNumber}</td> {/* Display Mobile Number */}
+                <td>{purchase.postalCode}</td>
+                <td>{purchase.mobileNumber}</td>
 
                 {/* Medicine Details */}
                 <td>
@@ -66,8 +85,15 @@ function AdminPurchases() {
                   ))}
                 </td>
 
-                <td>${purchase.totalAmount}</td> {/* Display totalAmount */}
+                <td>${purchase.totalAmount}</td>
                 <td>{new Date(purchase.date).toLocaleString()}</td>
+
+                {/* Delete Button */}
+                <td>
+                  <button onClick={() => handleDelete(purchase._id)} className="delete-btn">
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
