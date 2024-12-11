@@ -6,12 +6,14 @@ function ProductDetails({ medicine }) {
   const navigate = useNavigate();
 
   if (!medicine) {
-    return (
+   /* return (
       <div>
         <p>No product selected.</p>
         <button onClick={() => navigate('/')}>Go Back</button>
       </div>
-    );
+    );*/
+    navigate('/'); // Redirect to homepage if no medicine selected
+      return null;
   }
 
   return (
@@ -21,8 +23,10 @@ function ProductDetails({ medicine }) {
       <p>{medicine.description}</p>
       <p><strong>Price: ৳{medicine.price}</strong></p>
       <button onClick={() => navigate('/')}>Back to Search</button>
-      <button onClick={() => navigate('/proceed-with-purchase')}>
-  Proceed with Purchase</button>
+      <button
+  onClick={() => navigate('/proceed-with-purchase', { state: { selectedMedicine: medicine } })}>
+  Proceed with Purchase
+</button>
     </div>
   );
 }

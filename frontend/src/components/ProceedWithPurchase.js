@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { loadStripe } from '@stripe/stripe-js';
+import  {useLocation}  from 'react-router-dom';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import './ProceedWithPurchase.css';
 
@@ -9,17 +10,13 @@ import './ProceedWithPurchase.css';
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_KEY);
 // Replace with your Stripe publishable key
 
-function ProceedWithPurchase({ selectedMedicine }) {
+function ProceedWithPurchase({selectedMedicine}) {
+  const location = useLocation();
   const navigate = useNavigate();
 
-  // Redirect if no medicine is selected
-  useEffect(() => {
-    if (!selectedMedicine) {
-      console.log("No medicine selected. Redirecting to home...");
-      navigate('/'); // Redirect to homepage
-    }
-  }, [selectedMedicine, navigate]);
+ // const selectedMedicine = location.state?.selectedMedicine;
 
+  
   // State variables
   const [formData, setFormData] = useState({
     name: '',
@@ -29,12 +26,12 @@ function ProceedWithPurchase({ selectedMedicine }) {
     mobileNumber: '',
     quantity: 1,
   });
-
+  
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [clientSecret, setClientSecret] = useState('');
   const stripe = useStripe();
   const elements = useElements();
-
+  
   // Handle form input changes
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -43,7 +40,14 @@ function ProceedWithPurchase({ selectedMedicine }) {
       [name]: value,
     }));
   };
-
+  
+  // Redirect if no medicine is selected
+  useEffect(() => {
+    if (!selectedMedicine) {
+      console.log("No medicine selected. Redirecting to home...");
+      navigate('/'); // Redirect to homepage
+    }
+  }, [selectedMedicine, navigate]);
   // Calculate total amount
   const totalAmount = selectedMedicine ? selectedMedicine.price * formData.quantity : 0;
 
@@ -69,7 +73,28 @@ function ProceedWithPurchase({ selectedMedicine }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+      const purchaseData = {
+        customerName: formData.name,
+        email: formData.email,
+        address: formData.address,
+        postalCode: formData.postalCode,
+        mobileNumber: formData.mobileNumber,
+        medicineDetails: [
+          {
+            name: selectedMedicine.name,
+            price: selectedMedicine.price,
+            quantity: formData.quantity,
+          }
+        ],
+        totalAmount: totalAmount,
+      };
+  
+      
+      await axios.post('https://medicine-shop-backend.vercel.app/api/purchase', purchaseData);
+     // setPaymentSuccess(true);
+     
+    
+    
     if (!stripe || !elements) {
       console.log('Stripe.js or Elements not loaded yet.');
       return;
@@ -80,9 +105,9 @@ function ProceedWithPurchase({ selectedMedicine }) {
       setPaymentSuccess(true); // Proceed to success compliment page
       return;
     }
-
+    
     const cardElement = elements.getElement(CardElement);
-
+    
     try {
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
@@ -92,24 +117,25 @@ function ProceedWithPurchase({ selectedMedicine }) {
             email: formData.email,
           },
         },
-      });
-
+      }); 
       if (paymentIntent?.status === 'succeeded') {
         console.log('Payment successful!');
+        //navigate('/', { state: { selectedMedicine: null } }); 
       } else if (error) {
         console.error('Payment failed:', error.message);
       }
     } catch (err) {
       console.error('Payment processing error:', err.message);
     }
-
+    
     setPaymentSuccess(true);
   };
 
   const handleLogout2 = () => {
     localStorage.clear();
     sessionStorage.clear();
-    navigate('/'); // Navigate to homepage after logout
+    localStorage.removeItem('token');
+    navigate('/',{ state: { selectedMedicine: null } }); // Navigate to homepage after logout
   };
 
   if (!selectedMedicine) {

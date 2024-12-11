@@ -111,6 +111,10 @@ function App() {
           path="/product-details"
           element={<ProductDetails medicine={selectedMedicine} />}
         />
+       <Route
+          path="/proceed-with-purchase"
+          element={<ProceedWithPurchase selectedMedicine={selectedMedicine} />}
+        />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
